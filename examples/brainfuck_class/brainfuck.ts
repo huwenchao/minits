@@ -18,31 +18,13 @@ export class BrainfuckInterpreter {
     code: string;
     pc: number;
     ps: number;
+    stack: number[];
 
     constructor(code: string) {
         this.code = code;
         this.pc = 0;
         this.ps = 0;
-    }
-
-    reset() {
-        this.pc = 0;
-        this.ps = 0;
-    }
-
-    uint8(n: number): number {
-        if (n > 0xff) {
-            return this.uint8(n - 256);
-        }
-        if (n < 0x00) {
-            return this.uint8(n + 256);
-        }
-        return n
-    }
-
-    run(): number {
-        this.reset();
-        let stack = [
+        this.stack = [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -60,6 +42,28 @@ export class BrainfuckInterpreter {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ];
+    }
+
+    reset() {
+        this.pc = 0;
+        this.ps = 0;
+        for(let i=0; i<this.stack.length; i++) {
+            this.stack[i] = 0;
+        }
+    }
+
+    uint8(n: number): number {
+        if (n > 0xff) {
+            return this.uint8(n - 256);
+        }
+        if (n < 0x00) {
+            return this.uint8(n + 256);
+        }
+        return n
+    }
+
+    run(): number {
+        this.reset();
         // run
         for (; this.pc < this.code.length;) {
             let op = this.code[this.pc];
@@ -74,17 +78,17 @@ export class BrainfuckInterpreter {
                 continue
             }
             if (op === Opcode.ADD) {
-                stack[this.ps] = this.uint8(stack[this.ps] + 1);
+                this.stack[this.ps] = this.uint8(this.stack[this.ps] + 1);
                 this.pc += 1;
                 continue
             }
             if (op === Opcode.SUB) {
-                stack[this.ps] = this.uint8(stack[this.ps] - 1);
+                this.stack[this.ps] = this.uint8(this.stack[this.ps] - 1);
                 this.pc += 1;
                 continue
             }
             if (op === Opcode.PUTCHAR) {
-                this.putchar(stack[this.ps]);
+                this.putchar(this.stack[this.ps]);
                 this.pc += 1;
                 continue
             }
@@ -95,7 +99,7 @@ export class BrainfuckInterpreter {
 
 
             if (op === Opcode.LB) {
-                if (stack[this.ps] != 0x00) {
+                if (this.stack[this.ps] != 0x00) {
                     this.pc += 1;
                     continue
                 }
@@ -115,7 +119,7 @@ export class BrainfuckInterpreter {
                 continue
             }
             if (op === Opcode.RB) {
-                if (stack[this.ps] === 0x00) {
+                if (this.stack[this.ps] === 0x00) {
                     this.pc += 1;
                     continue
                 }
